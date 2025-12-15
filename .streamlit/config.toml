@@ -1,0 +1,26 @@
+[theme]
+primaryColor = "#2c3e50"
+backgroundColor = "#f5f7fa"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#2c3e50"
+font = "sans serif"
+
+[server]
+# Optimasi untuk berbagai device
+maxUploadSize = 50
+enableCORS = false
+enableXsrfProtection = true
+
+# Performance optimization untuk mobile
+runOnSave = false
+fileWatcherType = "auto"
+
+[browser]
+# Responsive design untuk mobile
+gatherUsageStats = false
+
+[client]
+# Caching untuk performance di mobile/laptop
+caching = true
+displayEnabled = true
+showErrorDetails = true

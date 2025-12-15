@@ -1,0 +1,9 @@
+streamlit
+scikit-learn
+pandas
+numpy
+plotly
+Sastrawi
+python-Levenshtein
+joblib
+scipy

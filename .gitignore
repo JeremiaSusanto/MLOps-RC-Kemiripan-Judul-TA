@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Streamlit cache (secrets.toml not included in repo for security)
+.streamlit/secrets.toml
+.streamlit/cache/
+
+# Model outputs (large models - retrained locally)
+model_outputs/
+
+# Lightweight models INCLUDED in repo for easy deployment
+# model_outputs_lightweight/ should be committed!
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backup files
+*_old.py
+*.bak
+
+# Notebooks (experimental/development only)
+notebooks/
