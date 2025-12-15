@@ -192,6 +192,27 @@ A: Full Model: TF-IDF 1000 features, ~114 KB. Lightweight: 500 features, ~44 KB 
 A: Dataset sangat imbalanced. Threshold auto-labeling perlu disesuaikan (0.45 untuk Full, 0.5 untuk Lightweight).
 
 **Q: Cara melihat perbandingan kedua model?**  
-A: Aplikasi otomatis load kedua model jika tersedia, dengan 3 tab: Full Model, Lightweight Model, dan Perbandingan
+A: Train kedua model (lightweight + full) secara lokal. Aplikasi otomatis mendeteksi dan menampilkan 3 tab: Full Model, Lightweight Model, dan Perbandingan.
+
+**Q: Kenapa di deployment tidak ada perbandingan model?**  
+A: Di Streamlit Cloud, hanya Lightweight Model yang tersedia (Full Model tidak di-commit karena ukuran). Aplikasi akan otomatis berjalan dalam mode single model.
+
 **Q: Ingin akurasi lebih tinggi?**
 A: Gunakan `python train_model.py` untuk full model dengan hyperparameter lebih kompleks.
+
+---
+
+## 📍 Perbedaan Local vs Deployment
+
+| Aspek | Local Development | Streamlit Cloud Deploy |
+|-------|-------------------|------------------------|
+| **Model Tersedia** | Full + Lightweight (jika di-train) | Lightweight only |
+| **Fitur Perbandingan** | ✅ Tersedia (jika kedua model ada) | ❌ Tidak tersedia |
+| **Ukuran Model** | Full: ~114 KB, Light: ~44 KB | Light: ~44 KB |
+| **TF-IDF Features** | Full: 1000, Light: 500 | Light: 500 |
+| **Training Ulang** | Diperlukan untuk Full Model | Tidak diperlukan |
+
+**💡 Tips:**
+- **Untuk demo/production cloud**: Gunakan Lightweight Model (sudah di-commit)
+- **Untuk penelitian/analisis lokal**: Train kedua model untuk perbandingan lengkap
+- **Untuk deployment pribadi**: Gunakan Git LFS jika ingin upload Full Model

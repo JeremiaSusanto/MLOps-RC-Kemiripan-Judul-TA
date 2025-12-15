@@ -16,11 +16,9 @@ build/
 .streamlit/secrets.toml
 .streamlit/cache/
 
-# Model outputs (large models - retrained locally)
-model_outputs/
-
-# Lightweight models INCLUDED in repo for easy deployment
-# model_outputs_lightweight/ should be committed!
+# Model outputs - BOTH models included in repo (small size ~150KB each)
+# model_outputs/ - Full Model (committed for comparison)
+# model_outputs_lightweight/ - Lightweight Model (committed for deployment)
 
 # IDE
 .vscode/

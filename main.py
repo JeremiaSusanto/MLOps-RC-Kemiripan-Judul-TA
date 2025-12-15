@@ -586,6 +586,16 @@ def main():
                     model_type = 'full' if models['full']['available'] else 'lightweight'
                     model = models[model_type]
                     
+                    # Info untuk user
+                    st.info(f"""
+                    ℹ️ **Mode Single Model**
+                    
+                    Saat ini hanya **{model['name']}** yang tersedia. 
+                    Fitur perbandingan model memerlukan kedua model (Full + Lightweight).
+                    
+                    💡 Untuk deployment di Streamlit Cloud, hanya Lightweight Model yang tersedia karena Full Model terlalu besar untuk Git.
+                    """)
+                    
                     with st.spinner("🔄 Memproses..."):
                         df_results = compute_similarities(
                             query,
