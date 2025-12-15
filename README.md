@@ -87,7 +87,6 @@ mlops-kemiripan-judul/
 ├── main.py                            # Aplikasi Streamlit (dual model)
 ├── requirements.txt                   # Dependencies Python
 ├── README.md                          # Dokumentasi
-├── GITHUB_DEPLOYMENT.md               # Panduan deployment
 └── kesimpulan.md                      # MLOps lifecycle documentation
 ```
 
