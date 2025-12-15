@@ -26,30 +26,66 @@ def load_models():
     models = {}
     
     # Cek dan load Full Model
-    if os.path.exists("model_outputs/tfidf.joblib"):
-        models['full'] = {
-            'tfidf': joblib.load("model_outputs/tfidf.joblib"),
-            'scaler': joblib.load("model_outputs/scaler.joblib"),
-            'rf_model': joblib.load("model_outputs/best_rf.joblib"),
-            'df_corpus': pd.read_csv("model_outputs/titles_preprocessed.csv"),
-            'name': 'Full Model',
-            'available': True
-        }
+    full_model_path = "model_outputs/tfidf.joblib"
+    if os.path.exists(full_model_path):
+        try:
+            models['full'] = {
+                'tfidf': joblib.load("model_outputs/tfidf.joblib"),
+                'scaler': joblib.load("model_outputs/scaler.joblib"),
+                'rf_model': joblib.load("model_outputs/best_rf.joblib"),
+                'df_corpus': pd.read_csv("model_outputs/titles_preprocessed.csv"),
+                'name': 'Full Model',
+                'available': True
+            }
+            st.sidebar.success(f"✅ Full Model loaded successfully")
+        except Exception as e:
+            models['full'] = {'available': False}
+            st.sidebar.error(f"❌ Full Model load failed: {str(e)}")
     else:
         models['full'] = {'available': False}
+        st.sidebar.warning(f"⚠️ Full Model not found at: {os.path.abspath('model_outputs/')}")
     
     # Cek dan load Lightweight Model
-    if os.path.exists("model_outputs_lightweight/tfidf.joblib"):
-        models['lightweight'] = {
-            'tfidf': joblib.load("model_outputs_lightweight/tfidf.joblib"),
-            'scaler': joblib.load("model_outputs_lightweight/scaler.joblib"),
-            'rf_model': joblib.load("model_outputs_lightweight/best_rf.joblib"),
-            'df_corpus': pd.read_csv("model_outputs_lightweight/titles_preprocessed.csv"),
-            'name': 'Lightweight Model',
-            'available': True
-        }
+    light_model_path = "model_outputs_lightweight/tfidf.joblib"
+    if os.path.exists(light_model_path):
+        try:
+            models['lightweight'] = {
+                'tfidf': joblib.load("model_outputs_lightweight/tfidf.joblib"),
+                'scaler': joblib.load("model_outputs_lightweight/scaler.joblib"),
+                'rf_model': joblib.load("model_outputs_lightweight/best_rf.joblib"),
+                'df_corpus': pd.read_csv("model_outputs_lightweight/titles_preprocessed.csv"),
+                'name': 'Lightweight Model',
+                'available': True
+            }
+            st.sidebar.success(f"✅ Lightweight Model loaded successfully")
+        except Exception as e:
+            models['lightweight'] = {'available': False}
+            st.sidebar.error(f"❌ Lightweight Model load failed: {str(e)}")
     else:
         models['lightweight'] = {'available': False}
+        st.sidebar.warning(f"⚠️ Lightweight Model not found at: {os.path.abspath('model_outputs_lightweight/')}")
+    
+    # Debug info - show directory contents
+    with st.sidebar.expander("🔍 Debug: Directory Structure"):
+        try:
+            st.text("Current working directory:")
+            st.code(os.getcwd())
+            
+            st.text("\nmodel_outputs/ contents:")
+            if os.path.exists("model_outputs"):
+                files = os.listdir("model_outputs")
+                st.code("\n".join(files) if files else "(empty)")
+            else:
+                st.code("(folder not found)")
+            
+            st.text("\nmodel_outputs_lightweight/ contents:")
+            if os.path.exists("model_outputs_lightweight"):
+                files = os.listdir("model_outputs_lightweight")
+                st.code("\n".join(files) if files else "(empty)")
+            else:
+                st.code("(folder not found)")
+        except Exception as e:
+            st.error(f"Debug error: {e}")
     
     # Validasi: minimal satu model harus tersedia
     if not models['full']['available'] and not models['lightweight']['available']:
