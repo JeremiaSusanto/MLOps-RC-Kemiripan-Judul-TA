@@ -7,3 +7,4 @@ Sastrawi
 python-Levenshtein
 joblib
 scipy
+matplotlib
