@@ -154,6 +154,27 @@ print("\nRandom Forest Test Results:")
 print(classification_report(y_test, y_pred_rf, target_names=['Tidak Mirip', 'Mirip']))
 print(f"ROC AUC: {roc_auc_score(y_test, y_proba_rf):.4f}")
 
+# Simpan metrics evaluasi
+from sklearn.metrics import accuracy_score, confusion_matrix
+import json
+
+metrics = {
+    'accuracy': float(accuracy_score(y_test, y_pred_rf)),
+    'f1_score': float(f1_score(y_test, y_pred_rf)),
+    'roc_auc': float(roc_auc_score(y_test, y_proba_rf)),
+    'classification_report': classification_report(y_test, y_pred_rf, target_names=['Tidak Mirip', 'Mirip'], output_dict=True),
+    'confusion_matrix': confusion_matrix(y_test, y_pred_rf).tolist(),
+    'best_params': grid_rf.best_params_,
+    'dataset_info': {
+        'total_samples': len(df),
+        'total_pairs': len(pairs_df),
+        'positive_pairs': int((pairs_df['label']==1).sum()),
+        'negative_pairs': int((pairs_df['label']==0).sum()),
+        'train_samples': len(X_train),
+        'test_samples': len(X_test)
+    }
+}
+
 # === 7. Simpan Model & Artefak ===
 print("\n[8/8] Menyimpan LIGHTWEIGHT model dan artefak...")
 output_dir = "model_outputs_lightweight"
@@ -165,9 +186,13 @@ joblib.dump(scaler, f"{output_dir}/scaler.joblib", compress=3)
 joblib.dump(best_rf, f"{output_dir}/best_rf.joblib", compress=3)
 df[['Judul', 'judul_proc']].to_csv(f"{output_dir}/titles_preprocessed.csv", index=False)
 
+# Simpan metrics
+with open(f"{output_dir}/metrics.json", "w") as f:
+    json.dump(metrics, f, indent=2)
+
 # Check file sizes
 print("\n📦 File sizes (compressed):")
-for fname in ['tfidf.joblib', 'scaler.joblib', 'best_rf.joblib', 'titles_preprocessed.csv']:
+for fname in ['tfidf.joblib', 'scaler.joblib', 'best_rf.joblib', 'titles_preprocessed.csv', 'metrics.json']:
     fpath = f"{output_dir}/{fname}"
     size_kb = os.path.getsize(fpath) / 1024
     size_mb = size_kb / 1024

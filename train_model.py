@@ -153,6 +153,27 @@ print("\nRandom Forest Test Results:")
 print(classification_report(y_test, y_pred_rf, target_names=['Tidak Mirip', 'Mirip']))
 print(f"ROC AUC: {roc_auc_score(y_test, y_proba_rf):.4f}")
 
+# Simpan metrics evaluasi
+from sklearn.metrics import accuracy_score, confusion_matrix
+import json
+
+metrics = {
+    'accuracy': float(accuracy_score(y_test, y_pred_rf)),
+    'f1_score': float(f1_score(y_test, y_pred_rf)),
+    'roc_auc': float(roc_auc_score(y_test, y_proba_rf)),
+    'classification_report': classification_report(y_test, y_pred_rf, target_names=['Tidak Mirip', 'Mirip'], output_dict=True),
+    'confusion_matrix': confusion_matrix(y_test, y_pred_rf).tolist(),
+    'best_params': grid_rf.best_params_,
+    'dataset_info': {
+        'total_samples': len(df),
+        'total_pairs': len(pairs_df),
+        'positive_pairs': int((pairs_df['label']==1).sum()),
+        'negative_pairs': int((pairs_df['label']==0).sum()),
+        'train_samples': len(X_train),
+        'test_samples': len(X_test)
+    }
+}
+
 # === 7. Simpan Model & Artefak ===
 print("\n[8/8] Menyimpan model dan artefak...")
 os.makedirs("model_outputs", exist_ok=True)
@@ -162,11 +183,16 @@ joblib.dump(scaler, "model_outputs/scaler.joblib")
 joblib.dump(best_rf, "model_outputs/best_rf.joblib")
 df.to_csv("model_outputs/titles_preprocessed.csv", index=False)
 
+# Simpan metrics
+with open("model_outputs/metrics.json", "w") as f:
+    json.dump(metrics, f, indent=2)
+
 print("\n✅ Model dan artefak berhasil disimpan ke folder 'model_outputs':")
 print("  - tfidf.joblib")
 print("  - scaler.joblib")
 print("  - best_rf.joblib")
 print("  - titles_preprocessed.csv")
+print("  - metrics.json")
 
 print("\n" + "=" * 80)
 print("TRAINING SELESAI! Model siap digunakan di aplikasi Streamlit.")

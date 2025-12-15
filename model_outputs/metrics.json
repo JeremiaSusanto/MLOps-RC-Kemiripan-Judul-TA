@@ -1,0 +1,50 @@
+{
+  "accuracy": 0.9428571428571428,
+  "f1_score": 0.9473684210526315,
+  "roc_auc": 0.9423076923076923,
+  "classification_report": {
+    "Tidak Mirip": {
+      "precision": 0.9444444444444444,
+      "recall": 0.9382716049382716,
+      "f1-score": 0.9413489736070381,
+      "support": 162
+    },
+    "Mirip": {
+      "precision": 0.9473684210526315,
+      "recall": 0.9521276595744681,
+      "f1-score": 0.9497424149012128,
+      "support": 188
+    },
+    "accuracy": 0.9428571428571428,
+    "macro avg": {
+      "precision": 0.945906432748538,
+      "recall": 0.9451996322563699,
+      "f1-score": 0.9455456942541254,
+      "support": 350
+    },
+    "weighted avg": {
+      "precision": 0.9460227272727273,
+      "recall": 0.9428571428571428,
+      "f1-score": 0.9444256756756756,
+      "support": 350
+    }
+  },
+  "confusion_matrix": [
+    [152, 10],
+    [9, 179]
+  ],
+  "best_params": {
+    "max_depth": null,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "n_estimators": 300
+  },
+  "dataset_info": {
+    "total_samples": 123,
+    "total_pairs": 1830,
+    "positive_pairs": 615,
+    "negative_pairs": 1215,
+    "train_samples": 1464,
+    "test_samples": 366
+  }
+}

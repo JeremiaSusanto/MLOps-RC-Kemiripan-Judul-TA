@@ -5,11 +5,14 @@ Menggunakan model ML (SVM dan Random Forest) yang sudah di-training.
 
 import os
 import math
+import json
 import joblib
 import numpy as np
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import StandardScaler
 from Levenshtein import ratio as levenshtein_ratio
@@ -64,28 +67,6 @@ def load_models():
     else:
         models['lightweight'] = {'available': False}
         st.sidebar.warning(f"⚠️ Lightweight Model not found at: {os.path.abspath('model_outputs_lightweight/')}")
-    
-    # Debug info - show directory contents
-    with st.sidebar.expander("🔍 Debug: Directory Structure"):
-        try:
-            st.text("Current working directory:")
-            st.code(os.getcwd())
-            
-            st.text("\nmodel_outputs/ contents:")
-            if os.path.exists("model_outputs"):
-                files = os.listdir("model_outputs")
-                st.code("\n".join(files) if files else "(empty)")
-            else:
-                st.code("(folder not found)")
-            
-            st.text("\nmodel_outputs_lightweight/ contents:")
-            if os.path.exists("model_outputs_lightweight"):
-                files = os.listdir("model_outputs_lightweight")
-                st.code("\n".join(files) if files else "(empty)")
-            else:
-                st.code("(folder not found)")
-        except Exception as e:
-            st.error(f"Debug error: {e}")
     
     # Validasi: minimal satu model harus tersedia
     if not models['full']['available'] and not models['lightweight']['available']:
@@ -356,7 +337,7 @@ def main():
     # Sidebar menu
     menu = st.sidebar.radio(
         "Menu",
-        ["🏠 Home", "ℹ️ About", "👥 Team"],
+        ["🏠 Home", "📊 Model Evaluation", "ℹ️ About", "👥 Team"],
         index=0,
     )
 
@@ -701,6 +682,227 @@ def main():
                         file_name="hasil_kemiripan.csv",
                         mime="text/csv",
                     )
+
+    elif menu == "📊 Model Evaluation":
+        st.markdown(
+            """
+            <div class="header-banner">
+            <h1 style="margin:0; font-size:2rem; font-weight:700">
+            Evaluasi Model Machine Learning
+            </h1>
+            <p style="margin-top:12px; font-size:1rem; line-height:1.5">
+            Metrik performa dan analisis mendalam dari model Random Forest yang digunakan
+            </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+        
+        # Load models info
+        models = load_models()
+        
+        # Pilihan model untuk evaluasi
+        available_models = []
+        if models['full']['available']:
+            available_models.append("Full Model")
+        if models['lightweight']['available']:
+            available_models.append("Lightweight Model")
+        
+        if len(available_models) == 0:
+            st.error("⚠️ Tidak ada model yang tersedia untuk evaluasi!")
+            st.stop()
+        
+        # Selector jika ada lebih dari 1 model
+        if len(available_models) > 1:
+            selected_model = st.selectbox("Pilih Model untuk Evaluasi:", available_models)
+        else:
+            selected_model = available_models[0]
+            st.info(f"📌 Menampilkan evaluasi untuk **{selected_model}**")
+        
+        # Load metrics
+        model_dir = "model_outputs" if selected_model == "Full Model" else "model_outputs_lightweight"
+        metrics_path = f"{model_dir}/metrics.json"
+        
+        if not os.path.exists(metrics_path):
+            st.error(f"""
+            ⚠️ File metrics.json tidak ditemukan!
+            
+            Model perlu di-train ulang untuk menghasilkan metrics:
+            ```
+            python {'train_model.py' if selected_model == 'Full Model' else 'train_model_lightweight.py'}
+            ```
+            """)
+            st.stop()
+        
+        # Read metrics
+        with open(metrics_path, 'r') as f:
+            metrics = json.load(f)
+        
+        # === 1. Overview Metrics ===
+        st.subheader("🎯 Metrik Utama")
+        col1, col2, col3 = st.columns(3)
+        
+        col1.metric(
+            "🎯 Accuracy",
+            f"{metrics['accuracy']:.4f}",
+            help="Persentase prediksi yang benar dari total prediksi"
+        )
+        
+        col2.metric(
+            "⚖️ F1-Score",
+            f"{metrics['f1_score']:.4f}",
+            help="Keseimbangan antara precision dan recall (weighted untuk dataset tidak seimbang)"
+        )
+        
+        col3.metric(
+            "📈 ROC AUC",
+            f"{metrics['roc_auc']:.4f}",
+            help="Kemampuan model membedakan antar kelas (0-1, semakin tinggi semakin baik)"
+        )
+        
+        st.markdown("---")
+        
+        # === 2. Classification Report ===
+        st.subheader("📊 Classification Report")
+        st.markdown("""
+        **Penjelasan Kolom:**
+        - **Precision**: Dari yang diprediksi positif, berapa persen yang benar-benar positif?
+        - **Recall**: Dari yang sebenarnya positif, berapa persen yang berhasil terdeteksi?
+        - **F1-Score**: Keseimbangan antara precision dan recall
+        - **Support**: Jumlah sampel di setiap kelas
+        """)
+        
+        report_df = pd.DataFrame(metrics['classification_report']).transpose()
+        
+        # Format dan styling
+        st.dataframe(
+            report_df.style.background_gradient(
+                subset=['precision', 'recall', 'f1-score'],
+                cmap='YlGn',
+                vmin=0,
+                vmax=1
+            ).format(precision=4),
+            use_container_width=True,
+            height=250
+        )
+        
+        st.markdown("---")
+        
+        # === 3. Confusion Matrix ===
+        st.subheader("🔢 Confusion Matrix")
+        st.markdown("""
+        Confusion Matrix menampilkan detail prediksi benar dan salah dari model:
+        - **Baris**: Label aktual (ground truth)
+        - **Kolom**: Label prediksi model
+        """)
+        
+        cm = np.array(metrics['confusion_matrix'])
+        
+        # Create heatmap
+        fig, ax = plt.subplots(figsize=(8, 6))
+        sns.heatmap(
+            cm, 
+            annot=True, 
+            fmt='d', 
+            cmap='Blues',
+            xticklabels=['Tidak Mirip (0)', 'Mirip (1)'],
+            yticklabels=['Tidak Mirip (0)', 'Mirip (1)'],
+            cbar_kws={'label': 'Jumlah Prediksi'},
+            ax=ax
+        )
+        ax.set_xlabel('Prediksi', fontsize=12, fontweight='bold')
+        ax.set_ylabel('Aktual', fontsize=12, fontweight='bold')
+        ax.set_title(f'Confusion Matrix - {selected_model}', fontsize=14, fontweight='bold', pad=20)
+        plt.tight_layout()
+        st.pyplot(fig)
+        
+        # Penjelasan nilai confusion matrix
+        st.markdown("### 📝 Interpretasi Confusion Matrix")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**✅ True Positive (TP)**")
+            st.write(f"{cm[1,1]:,} - Prediksi mirip, kenyataannya memang mirip")
+            
+            st.markdown("**⚠️ False Positive (FP)**")
+            st.write(f"{cm[0,1]:,} - Prediksi mirip, tapi kenyataannya tidak mirip (Type I Error)")
+        
+        with col2:
+            st.markdown("**✅ True Negative (TN)**")
+            st.write(f"{cm[0,0]:,} - Prediksi tidak mirip, kenyataannya memang tidak mirip")
+            
+            st.markdown("**❌ False Negative (FN)**")
+            st.write(f"{cm[1,0]:,} - Prediksi tidak mirip, tapi kenyataannya mirip (Type II Error)")
+        
+        st.markdown("---")
+        
+        # === 4. Best Parameters ===
+        st.subheader("⚙️ Hyperparameters Terbaik")
+        st.markdown("Hyperparameter optimal yang ditemukan melalui GridSearchCV:")
+        
+        params_df = pd.DataFrame([
+            {"Parameter": k, "Value": str(v)} 
+            for k, v in metrics['best_params'].items()
+        ])
+        st.dataframe(params_df, use_container_width=True, hide_index=True)
+        
+        st.markdown("---")
+        
+        # === 5. Dataset Info ===
+        st.subheader("📂 Informasi Dataset")
+        dataset_info = metrics['dataset_info']
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.metric("📄 Total Judul", f"{dataset_info['total_samples']:,}")
+            st.metric("🔗 Total Pasangan", f"{dataset_info['total_pairs']:,}")
+            st.metric("✅ Pasangan Mirip (Label 1)", f"{dataset_info['positive_pairs']:,}")
+        
+        with col2:
+            st.metric("❌ Pasangan Tidak Mirip (Label 0)", f"{dataset_info['negative_pairs']:,}")
+            st.metric("📊 Data Training", f"{dataset_info['train_samples']:,}")
+            st.metric("🧪 Data Testing", f"{dataset_info['test_samples']:,}")
+        
+        # Class distribution
+        st.markdown("### 📊 Distribusi Kelas")
+        dist_data = pd.DataFrame({
+            'Kelas': ['Tidak Mirip', 'Mirip'],
+            'Jumlah': [dataset_info['negative_pairs'], dataset_info['positive_pairs']]
+        })
+        
+        fig_dist = px.bar(
+            dist_data,
+            x='Kelas',
+            y='Jumlah',
+            color='Kelas',
+            color_discrete_map={'Tidak Mirip': '#e74c3c', 'Mirip': '#27ae60'},
+            text='Jumlah'
+        )
+        fig_dist.update_traces(texttemplate='%{text:,}', textposition='outside')
+        fig_dist.update_layout(
+            showlegend=False,
+            height=400,
+            xaxis_title="",
+            yaxis_title="Jumlah Pasangan",
+            font=dict(family="sans-serif", size=12, color="#2c3e50")
+        )
+        st.plotly_chart(fig_dist, use_container_width=True)
+        
+        # Imbalance warning
+        ratio = dataset_info['positive_pairs'] / dataset_info['negative_pairs']
+        if ratio < 0.5 or ratio > 2.0:
+            st.warning(f"""
+            ⚠️ **Dataset Imbalanced Detected**
+            
+            Rasio Mirip:Tidak Mirip = {ratio:.2f}:1
+            
+            Model mungkin bias terhadap kelas mayoritas. Pertimbangkan teknik balancing seperti:
+            - Oversampling (SMOTE)
+            - Undersampling
+            - Class weights adjustment
+            """)
 
     elif menu == "ℹ️ About":
         st.markdown(

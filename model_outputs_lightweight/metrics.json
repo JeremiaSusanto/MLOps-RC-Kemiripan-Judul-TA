@@ -1,0 +1,50 @@
+{
+  "accuracy": 0.9371428571428572,
+  "f1_score": 0.9421052631578948,
+  "roc_auc": 0.9365079365079365,
+  "classification_report": {
+    "Tidak Mirip": {
+      "precision": 0.9375,
+      "recall": 0.9259259259259259,
+      "f1-score": 0.9316770186335404,
+      "support": 162
+    },
+    "Mirip": {
+      "precision": 0.9375,
+      "recall": 0.9468085106382979,
+      "f1-score": 0.9421221864951769,
+      "support": 188
+    },
+    "accuracy": 0.9371428571428572,
+    "macro avg": {
+      "precision": 0.9375,
+      "recall": 0.9363672182821119,
+      "f1-score": 0.9368996025643586,
+      "support": 350
+    },
+    "weighted avg": {
+      "precision": 0.9375,
+      "recall": 0.9371428571428572,
+      "f1-score": 0.9372803373228756,
+      "support": 350
+    }
+  },
+  "confusion_matrix": [
+    [150, 12],
+    [10, 178]
+  ],
+  "best_params": {
+    "max_depth": 20,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "n_estimators": 200
+  },
+  "dataset_info": {
+    "total_samples": 123,
+    "total_pairs": 1830,
+    "positive_pairs": 615,
+    "negative_pairs": 1215,
+    "train_samples": 1464,
+    "test_samples": 366
+  }
+}
