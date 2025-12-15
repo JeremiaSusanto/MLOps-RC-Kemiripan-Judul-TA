@@ -118,7 +118,7 @@ Dataset `dataset_TA.csv` berisi 123 judul tugas akhir dalam Bahasa Indonesia den
 - **Muhammad Zaky Zaiddan** (122450119)
 - **Vira Putri Maharani** (122450129)
 
-**Tugas Besar Projek Sains Data**  
+**Tugas Besar Machine Learning Operations**  
 Institut Teknologi Sumatera - 2025
 
 ---
